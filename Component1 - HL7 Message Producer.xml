@@ -1,0 +1,1430 @@
+<channel version="4.2.0">
+  <id>a996e435-a669-4e5d-a871-bed515b477b3</id>
+  <nextMetaDataId>3</nextMetaDataId>
+  <name>Component1 - HL7 Message Producer</name>
+  <description></description>
+  <revision>48</revision>
+  <sourceConnector version="4.2.0">
+    <metaDataId>0</metaDataId>
+    <name>sourceConnector</name>
+    <properties class="com.mirth.connect.connectors.vm.VmReceiverProperties" version="4.2.0">
+      <pluginProperties>
+        <com.mirth.connect.plugins.clusteringadvanced.shared.AdvancedClusteringConnectorPluginProperties version="4.2.0">
+  <useChannelSetting>true</useChannelSetting>
+          <guaranteeOrder>false</guaranteeOrder>
+        </com.mirth.connect.plugins.clusteringadvanced.shared.AdvancedClusteringConnectorPluginProperties>
+      </pluginProperties>
+      <sourceConnectorProperties version="4.2.0">
+        <responseVariable>None</responseVariable>
+        <respondAfterProcessing>true</respondAfterProcessing>
+        <processBatch>true</processBatch>
+        <firstResponse>false</firstResponse>
+        <processingThreads>1</processingThreads>
+        <resourceIds class="linked-hash-map">
+          <entry>
+            <string>Default Resource</string>
+            <string>[Default Resource]</string>
+          </entry>
+        </resourceIds>
+        <queueBufferSize>1000</queueBufferSize>
+      </sourceConnectorProperties>
+    </properties>
+    <transformer version="4.2.0">
+      <elements>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="4.2.0">
+          <name>STATIC and Javascript Variables</name>
+          <sequenceNumber>0</sequenceNumber>
+          <enabled>true</enabled>
+          <script>// Begin STATIC and Javascript Variables
+
+
+
+// Logger Debug Switch
+var debug = true;
+
+// * MSH1.1 Field Separator - STATIC
+var fieldSeparator = &apos;|&apos;;
+
+// * MSH2.1 Encoding Characters - STATIC
+var encodingCharacters = &apos;^~\&amp;&apos;;
+
+// Get Current DateTime
+var dateTime = DateUtil.getCurrentDate(&apos;YYYYMMddHHmmsssss&apos;);
+
+// * MSH10.1 Message Control ID - Add UUID
+var uuid = UUIDGenerator.getUUID();
+
+// * MSH9.1 Message Type - STATIC
+var messageType = &apos;ADT&apos;;
+
+// * MSH11.1 Processing ID - STATIC
+var  processingId = &apos;P&apos;;
+
+// * MSH12.1 Version ID - STATIC
+var versionId = &apos;2.3&apos;;
+
+
+/* PID SEGMENT */
+// * PID.1.1 Set ID	- STATIC
+var pidSetId = &apos;1&apos;;
+
+// * PV1.1.1 Set ID - STATIC
+var pv1SetId = &apos;1&apos;;
+
+
+
+// End</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="4.2.0">
+          <name>Set HL7 variables from inbound CSV Batch File</name>
+          <sequenceNumber>1</sequenceNumber>
+          <enabled>true</enabled>
+          <script>// Begin
+
+
+
+/* MSH SEGMENT */
+// * EVENT - Trigger Type Condition
+var event = msg[&apos;row&apos;][&apos;column1&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - event:  &apos; + event)};
+channelMap.put(&apos;event&apos;, event);
+
+
+// * MSH1.1 Field Separator - STATIC
+//var fieldSeparator = msg[&apos;row&apos;][&apos;column2&apos;].toString();
+//if (debug === true) { logger.info(channelName + &apos; - fieldSeparatorCSV:  &apos; + fieldSeparator)}; 
+//channelMap.put(&apos;fieldSeparatorCSV&apos;, fieldSeparator); 
+//var fieldSeparator = &apos;|&apos;;
+if (debug === true) { logger.info(channelName + &apos; - fieldSeparator:  &apos; + fieldSeparator)}; 
+channelMap.put(&apos;fieldSeparator&apos;, fieldSeparator); 
+tmp[&apos;MSH&apos;][&apos;MSH.1&apos;] = fieldSeparator;
+
+
+// * MSH2.1 Encoding Characters - STATIC
+//var encodingCharacters = msg[&apos;row&apos;][&apos;column3&apos;].toString();
+//if (debug === true) { logger.info(channelName + &apos; - encodingCharactersCSV:  &apos; + encodingCharacters)}; 
+//channelMap.put(&apos;encodingCharactersCSV&apos;, encodingCharacters); 
+//var encodingCharacters = &apos;^~\&amp;&apos;;
+if (debug === true) { logger.info(channelName + &apos; - encodingCharacters:  &apos; + encodingCharacters)}; 
+channelMap.put(&apos;encodingCharacters&apos;, encodingCharacters); 
+tmp[&apos;MSH&apos;][&apos;MSH.2&apos;] = encodingCharacters;
+
+
+// MSH3.1 Sending Application
+var sendingApplication = msg[&apos;row&apos;][&apos;column4&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - sendingApplication:  &apos; + sendingApplication)}; 
+channelMap.put(&apos;sendingApplication&apos;, sendingApplication); 
+tmp[&apos;MSH&apos;][&apos;MSH.3&apos;][&apos;MSH.3.1&apos;] = sendingApplication;
+
+
+// MSH4.1 Sending Facility
+var sendingfacility = msg[&apos;row&apos;][&apos;column5&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - sendingfacility:  &apos; + sendingfacility)}; 
+channelMap.put(&apos;sendingfacility&apos;, sendingfacility); 
+tmp[&apos;MSH&apos;][&apos;MSH.4&apos;][&apos;MSH.4.1&apos;] = sendingfacility;
+
+
+// MSH5.1 Receiving Application
+var receivingApplication = msg[&apos;row&apos;][&apos;column6&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - receivingApplication:  &apos; + receivingApplication)}; 
+channelMap.put(&apos;receivingApplication&apos;, receivingApplication); 
+tmp[&apos;MSH&apos;][&apos;MSH.5&apos;][&apos;MSH.5.1&apos;] = receivingApplication;
+
+
+// MSH6.1 Receiving Facility
+var receivingfacility = msg[&apos;row&apos;][&apos;column7&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - receivingfacility:  &apos; + receivingfacility)}; 
+channelMap.put(&apos;receivingfacility&apos;, receivingfacility); 
+tmp[&apos;MSH&apos;][&apos;MSH.6&apos;][&apos;MSH.6.1&apos;] = receivingfacility;
+
+
+// * MSH7.1 Date/Time of Message - dateUtil
+var dateTimeOfMessage = msg[&apos;row&apos;][&apos;column8&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - dateTimeOfMessageCSV:  &apos; + dateTimeOfMessage)}; 
+channelMap.put(&apos;dateTimeOfMessageCSV&apos;, dateTimeOfMessage); 
+if (debug === true) { logger.info(channelName + &apos; - dateTimeOfMessage:  &apos; + dateTime)}; 
+channelMap.put(&apos;dateTimeOfMessage&apos;, dateTime); 
+tmp[&apos;MSH&apos;][&apos;MSH.7&apos;][&apos;MSH.7.1&apos;] = dateTime;
+
+
+// * MSH9.1 Message Type - STATIC
+//var messageType = msg[&apos;row&apos;][&apos;column9&apos;].toString();
+//if (debug === true) { logger.info(channelName + &apos; - messageType:  &apos; + messageType)}; 
+//channelMap.put(&apos;messageType&apos;, messageType); 
+//var messageType = &apos;ADT&apos;;
+if (debug === true) { logger.info(channelName + &apos; - messageType:  &apos; + messageType)}; 
+channelMap.put(&apos;messageType&apos;, messageType); 
+tmp[&apos;MSH&apos;][&apos;MSH.9&apos;][&apos;MSH.9.1&apos;] = messageType;
+
+
+// * MSH9.2 Trigger Event - Add if event condition
+//var triggerEvent = msg[&apos;row&apos;][&apos;column10&apos;].toString();
+//if (debug === true) { logger.info(channelName + &apos; - triggerEventCSV:  &apos; + triggerEvent)}; 
+//channelMap.put(&apos;triggerEventCSV&apos;, triggerEvent); 
+if (event == &apos;ADMIT&apos;) {
+	event = &apos;A01&apos;;
+} else if (event == &apos;TRANSFER&apos;) {
+	event = &apos;A02&apos;;
+} else if (event == &apos;DISCHARGE&apos;) {
+	event = &apos;A03&apos;;
+} else {
+	event = &apos;A01&apos;;
+};
+if (debug === true) { logger.info(channelName + &apos; - event:  &apos; + event)}; 
+channelMap.put(&apos;event&apos;, event); 
+tmp[&apos;MSH&apos;][&apos;MSH.9&apos;][&apos;MSH.9.2&apos;] = event;
+
+
+// * MSH10.1 Message Control ID - Add UUID
+var messageControlId = msg[&apos;row&apos;][&apos;column11&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - messageControlIdCSV:  &apos; + messageControlId)}; 
+channelMap.put(&apos;messageControlIdCSV&apos;, messageControlId); 
+if (debug === true) { logger.info(channelName + &apos; - messageControlId:  &apos; + uuid)}; 
+channelMap.put(&apos;messageControlId&apos;, uuid); 
+tmp[&apos;MSH&apos;][&apos;MSH.10&apos;][&apos;MSH.10.1&apos;] = uuid;
+
+
+// * MSH11.1 Processing ID - STATIC
+//var processingId = msg[&apos;row&apos;][&apos;column12&apos;].toString();
+//if (debug === true) { logger.info(channelName + &apos; - processingIdCSV:  &apos; + processingId)}; 
+//channelMap.put(&apos;processingIdCSV&apos;, processingId); 
+//var  processingId = &apos;P&apos;;
+if (debug === true) { logger.info(channelName + &apos; - processingId:  &apos; + processingId)}; 
+channelMap.put(&apos;processingId&apos;, processingId); 
+tmp[&apos;MSH&apos;][&apos;MSH.11&apos;][&apos;MSH.11.1&apos;] = processingId;
+
+
+// * MSH12.1 Version ID - STATIC
+//var versionId = msg[&apos;row&apos;][&apos;column13&apos;].toString();
+//if (debug === true) { logger.info(channelName + &apos; - versionIdCSV:  &apos; + versionId)}; 
+//channelMap.put(&apos;versionIdCSV&apos;, versionId);
+if (debug === true) { logger.info(channelName + &apos; - versionId:  &apos; + versionId)}; 
+channelMap.put(&apos;versionId&apos;, versionId);
+tmp[&apos;MSH&apos;][&apos;MSH.12&apos;][&apos;MSH.12.1&apos;] = versionId;
+
+
+
+/* PID SEGMENT */
+// * PID.1.1 Set ID	- STATIC
+if (debug === true) { logger.info(channelName + &apos; - pidSetId:  &apos; + pidSetId)}; 
+channelMap.put(&apos;pidSetId&apos;, pidSetId); 
+tmp[&apos;PID&apos;][&apos;PID.1&apos;][&apos;PID.1.1&apos;] = pidSetId;
+
+
+// PID.3.1 ID Internal
+var patientId = msg[&apos;row&apos;][&apos;column15&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - patientId:  &apos; + patientId)}; 
+channelMap.put(&apos;patientId&apos;, patientId); 
+tmp[&apos;PID&apos;][&apos;PID.3&apos;][&apos;PID.3.1&apos;] = patientId;
+
+
+// PID.5.1 Family Name
+var familyName = msg[&apos;row&apos;][&apos;column16&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - familyName:  &apos; + familyName)}; 
+channelMap.put(&apos;familyName&apos;, familyName); 
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.1&apos;] = familyName;
+
+
+// PID.5.2 Given Name
+var givenName = msg[&apos;row&apos;][&apos;column17&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - givenName:  &apos; + givenName)}; 
+channelMap.put(&apos;givenName&apos;, givenName); 
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.2&apos;] = givenName;
+
+
+// PID.5.3 Middle Name
+var middleName = msg[&apos;row&apos;][&apos;column18&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - middleName:  &apos; + middleName)}; 
+channelMap.put(&apos;middleName&apos;, middleName); 
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.3&apos;] = middleName;
+
+
+// PID.5.4 Suffix
+var suffix = msg[&apos;row&apos;][&apos;column19&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - suffix:  &apos; + suffix)}; 
+channelMap.put(&apos;suffix&apos;, suffix); 
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.4&apos;] = suffix;
+
+
+// PID.5.5 Prefix
+var prefix = msg[&apos;row&apos;][&apos;column20&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - prefix:  &apos; + prefix)}; 
+channelMap.put(&apos;prefix&apos;, prefix); 
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.5&apos;] = prefix;
+
+
+// * PID.7.1 DateTime of Birth - DateUtil.convertDate
+var dob = msg[&apos;row&apos;][&apos;column21&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - dobCSV:  &apos; + dob)}; 
+channelMap.put(&apos;dobCSV&apos;, dob); 
+dob = DateUtil.convertDate(&apos;MMddyyyy&apos;, &apos;yyyyMMdd&apos;, dob)
+if (debug === true) { logger.info(channelName + &apos; - dob:  &apos; + dob)}; 
+channelMap.put(&apos;dob&apos;, dob); 
+tmp[&apos;PID&apos;][&apos;PID.7&apos;][&apos;PID.7.1&apos;] = dob;
+
+
+// * PID.8.1 Administrative Sex - Add if condition
+var sex = msg[&apos;row&apos;][&apos;column22&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - sexCSV:  &apos; + sex)}; 
+channelMap.put(&apos;sexCSV&apos;, sex); 
+if (sex == &apos;FEMALE&apos;) {
+	sex = &apos;F&apos;;
+
+} else if (sex == &apos;MALE&apos;) {
+	sex = &apos;M&apos;;
+
+} else if (event == &apos;OTHER&apos;) {
+	sex = &apos;O&apos;;
+
+} else {
+	sex = &apos;U&apos;;
+
+};
+if (debug === true) { logger.info(channelName + &apos; - sex:  &apos; + sex)}; 
+channelMap.put(&apos;sex&apos;, sex); 
+tmp[&apos;PID&apos;][&apos;PID.1&apos;][&apos;PID.1.1&apos;] = sex;
+
+
+// * PID.10.1 Race - Add if condition
+var race = msg[&apos;row&apos;][&apos;column23&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - raceCSV:  &apos; + race)}; 
+channelMap.put(&apos;raceCSV&apos;, race);
+if (race == &apos;AMERICAN INDIAN OR ALASKA NATIVE&apos;) {
+	race = &apos;AA&apos;;
+
+} else if (race == &apos;AMERICAN INDIAN&apos;) {
+	race = &apos;AA&apos;;
+
+} else if (race == &apos;ALASKA NATIVE&apos;) {
+	race = &apos;AA&apos;;
+
+} else if (race == &apos;ASIAN&apos;) {
+	race = &apos;A&apos;;
+
+} else if (race == &apos;BLACK OR AFRICAN AMERICAN&apos;) {
+	race = &apos;B&apos;;
+
+} else if (race == &apos;BLACK&apos;) {
+	race = &apos;B&apos;;
+
+} else if (race == &apos;AFRICAN AMERICAN&apos;) {
+	race = &apos;B&apos;;
+
+} else if (race == &apos;NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER&apos;) {
+	race = &apos;N&apos;;
+
+} else if (race == &apos;NATIVE HAWAIIAN&apos;) {
+	race = &apos;N&apos;;
+
+} else if (race == &apos;OTHER PACIFIC ISLANDER&apos;) {
+	race = &apos;N&apos;;
+
+} else if (race == &apos;WHITE&apos;) {
+	race = &apos;W&apos;;
+
+} else {
+	race = &apos;U&apos;;
+
+};
+if (debug === true) { logger.info(channelName + &apos; - race:  &apos; + race)}; 
+channelMap.put(&apos;race&apos;, race); 
+tmp[&apos;PID&apos;][&apos;PID.1&apos;][&apos;PID.1.1&apos;] = race;
+
+
+// PID.11.1 Street Address
+var address1 = msg[&apos;row&apos;][&apos;column24&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - address1:  &apos; + address1)}; 
+channelMap.put(&apos;address1&apos;, address1); 
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.1&apos;] = address1;
+
+
+// PID.11.2 Other Designation
+var address2 = msg[&apos;row&apos;][&apos;column25&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - address2:  &apos; + address2)}; 
+channelMap.put(&apos;address2&apos;, address2); 
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.2&apos;] = address2;
+
+
+// PID.11.3 City
+var city = msg[&apos;row&apos;][&apos;column26&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - city:  &apos; + city)}; 
+channelMap.put(&apos;city&apos;, city); 
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.3&apos;] = city;
+
+
+// PID.11.4 State
+var state = msg[&apos;row&apos;][&apos;column27&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - state:  &apos; + state)}; 
+channelMap.put(&apos;state&apos;, state); 
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.4&apos;] = state;
+
+
+// PID.11.5 Postal Code
+var zip = msg[&apos;row&apos;][&apos;column28&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - zip:  &apos; + zip)}; 
+channelMap.put(&apos;zip&apos;, zip); 
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.5&apos;] = zip;
+
+
+// PID.12.1 County Code
+var countyCode = msg[&apos;row&apos;][&apos;column29&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - countyCode:  &apos; + countyCode)}; 
+channelMap.put(&apos;countyCode&apos;, countyCode); 
+tmp[&apos;PID&apos;][&apos;PID.12&apos;][&apos;PID.12.1&apos;] = countyCode;
+
+
+// * PID.13.1 Phone Number Home - JavaScript
+var phoneHome = msg[&apos;row&apos;][&apos;column30&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - phoneHomeCSV:  &apos; + phoneHome)}; 
+channelMap.put(&apos;phoneHomeCSV&apos;, phoneHome);
+phoneHome = phoneHome.replace(&apos;-&apos;, &apos;&apos;).replace(&apos; &apos;, &apos;&apos;).replace(&apos;)&apos;, &apos;&apos;).replace(&apos;(&apos;, &apos;&apos;);
+if (debug === true) { logger.info(channelName + &apos; - phoneHome:  &apos; + phoneHome)}; 
+channelMap.put(&apos;phoneHome&apos;, phoneHome); 
+tmp[&apos;PID&apos;][&apos;PID.13&apos;][&apos;PID.13.1&apos;] = phoneHome;
+
+
+// PID.13.4 Phone Number Home Email Address
+var emailAddress = msg[&apos;row&apos;][&apos;column31&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - emailAddress:  &apos; + emailAddress)}; 
+channelMap.put(&apos;emailAddress&apos;, emailAddress); 
+tmp[&apos;PID&apos;][&apos;PID.13&apos;][&apos;PID.13.4&apos;] = emailAddress;
+
+
+// * PID.14.1 Phone Number Business - JavaScript
+var phoneBusiness = msg[&apos;row&apos;][&apos;column32&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - phoneBusinessCSV:  &apos; + phoneBusiness)}; 
+channelMap.put(&apos;phoneBusinessCSV&apos;, phoneBusiness); 
+phoneBusiness = phoneBusiness.replace(&apos;-&apos;, &apos;&apos;).replace(&apos; &apos;, &apos;&apos;).replace(&apos;)&apos;, &apos;&apos;).replace(&apos;(&apos;, &apos;&apos;);
+if (debug === true) { logger.info(channelName + &apos; - phoneBusiness:  &apos; + phoneBusiness)}; 
+channelMap.put(&apos;phoneBusiness&apos;, phoneBusiness); 
+tmp[&apos;PID&apos;][&apos;PID.14&apos;][&apos;PID.14.1&apos;] = phoneBusiness;
+
+
+// PID.15.1 Primary Language
+var language = msg[&apos;row&apos;][&apos;column33&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - languageCSV:  &apos; + language)}; 
+channelMap.put(&apos;languageCSV&apos;, language); 
+if (language == &apos;ENGLISH&apos;) {
+	language = &apos;E&apos;;
+
+} else if (language == &apos;FRENCH&apos;) {
+	language = &apos;F&apos;;
+
+} else if (language == &apos;RUSSIAN&apos;) {
+	language = &apos;R&apos;;
+
+} else if (language == &apos;SPANISH&apos;) {
+	language = &apos;S&apos;;
+
+} else if (language == &apos;ARABIC&apos;) {
+	language = &apos;A&apos;;
+
+} else if (language == &apos;MANDARIN CHINESE&apos;) {
+	language = &apos;M&apos;;
+
+} else if (language == &apos;HINDI&apos;) {
+	language = &apos;H&apos;;
+
+} else if (language == &apos;OTHER&apos;) {
+	language = &apos;O&apos;;
+
+} else {
+	language = &apos;O&apos;;
+
+};
+if (debug === true) { logger.info(channelName + &apos; - language:  &apos; + language)}; 
+channelMap.put(&apos;language&apos;, language); 
+tmp[&apos;PID&apos;][&apos;PID.15&apos;][&apos;PID.15.1&apos;] = language;
+
+
+// * PID.16.1 Marital Status - Add if condition
+var maritalStatus = msg[&apos;row&apos;][&apos;column34&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - maritalStatusCSV:  &apos; + maritalStatus)}; 
+channelMap.put(&apos;maritalStatusCSV&apos;, maritalStatus); 
+if (maritalStatus = &apos;SEPARATED&apos;) {
+	maritalStatus = &apos;E&apos;;
+
+} else if (maritalStatus == &apos;DIVORCED&apos;) {
+	maritalStatus = &apos;F&apos;;
+
+} else if (maritalStatus == &apos;RUSSIAN&apos;) {
+	maritalStatus = &apos;R&apos;;
+
+} else if (maritalStatus == &apos;MARRIED&apos;) {
+	maritalStatus = &apos;S&apos;;
+
+} else if (maritalStatus == &apos;SINGLE&apos;) {
+	maritalStatus = &apos;A&apos;;
+
+} else if (maritalStatus == &apos;WIDOWED&apos;) {
+	maritalStatus = &apos;H&apos;;
+
+} else {
+	maritalStatus = &apos;U&apos;;
+
+};
+if (debug === true) { logger.info(channelName + &apos; - maritalStatus:  &apos; + maritalStatus)}; 
+channelMap.put(&apos;maritalStatus&apos;, maritalStatus); 
+tmp[&apos;PID&apos;][&apos;PID.16&apos;][&apos;PID.16.1&apos;] = maritalStatus;
+
+
+// * PID.17.1 Religion - Add if condition
+var religion = msg[&apos;row&apos;][&apos;column35&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - religionCSV:  &apos; + religion)}; 
+channelMap.put(&apos;religionCSV&apos;, religion); 
+if (religion == &apos;ISLAM&apos;) {
+	religion = &apos;I&apos;;
+
+} else if (religion == &apos;HINDUISM&apos;) {
+	religion = &apos;H&apos;;
+
+} else if (religion == &apos;JUDAISM&apos;) {
+	religion = &apos;J&apos;;
+
+} else if (religion == &apos;CHRISTIANITY&apos;) {
+	religion = &apos;C&apos;;
+
+} else if (religion == &apos;FOLK RELIGIONS&apos;) {
+	religion = &apos;F&apos;;
+
+} else if (religion == &apos;DEISM&apos;) {
+	religion = &apos;D&apos;;
+
+} else if (religion == &apos;MONOTHEISM&apos;) {
+	religion = &apos;M&apos;;
+
+} else if (religion == &apos;SIKHISM&apos;) {
+	religion = &apos;S&apos;;
+
+} else if (religion == &apos;NONTHEISM&apos;) {
+	religion = &apos;N&apos;;
+
+} else if (religion == &apos;SHINTO&apos;) {
+	religion = &apos;SH&apos;;
+
+} else if (religion == &apos;BUDDHISM&apos;) {
+	religion = &apos;B&apos;;
+
+} else if (religion == &apos;JAINISM&apos;) {
+	religion = &apos;JA&apos;;
+
+} else if (religion == &apos;POLYTHEISM&apos;) {
+	religion = &apos;JA&apos;;
+
+} else if (religion == &apos;BAHÁʼÍ FAITH&apos;) {
+	religion = &apos;BF&apos;;
+
+} else if (religion == &apos;BAHAʼI FAITH&apos;) {
+	religion = &apos;BF&apos;;
+
+} else if (religion == &apos;BAHAʼI&apos;) {
+	religion = &apos;BF&apos;;
+
+} else if (religion == &apos;BAHAI&apos;) {
+	religion = &apos;BF&apos;;
+
+} else {
+	religion = &apos;U&apos;;
+
+};
+if (debug === true) { logger.info(channelName + &apos; - religion:  &apos; + religion)}; 
+channelMap.put(&apos;religion&apos;, religion); 
+tmp[&apos;PID&apos;][&apos;PID.17&apos;][&apos;PID.17.1&apos;] = religion;
+
+
+// PID.18.1 Account Number ID
+var accountNumberId = msg[&apos;row&apos;][&apos;column36&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - accountNumberId:  &apos; + accountNumberId)}; 
+channelMap.put(&apos;accountNumberId&apos;, accountNumberId); 
+tmp[&apos;PID&apos;][&apos;PID.18&apos;][&apos;PID.18.1&apos;] = accountNumberId;
+
+
+// PID.19.1 SSN Number
+var ssn = msg[&apos;row&apos;][&apos;column37&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - ssn:  &apos; + ssn)}; 
+channelMap.put(&apos;ssn&apos;, ssn); 
+tmp[&apos;PID&apos;][&apos;PID.19&apos;][&apos;PID.19.1&apos;] = ssn;
+
+
+// PID.20.1 Drivers License Number
+var driverLicense = msg[&apos;row&apos;][&apos;column38&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - driverLicense:  &apos; + driverLicense)}; 
+channelMap.put(&apos;driverLicense&apos;, driverLicense); 
+tmp[&apos;PID&apos;][&apos;PID.20&apos;][&apos;PID.20.1&apos;] = driverLicense;
+
+
+// * PID.22.1 Ethnic Group - Add if condition
+var ethnicity = msg[&apos;row&apos;][&apos;column39&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - ethnicityCSV:  &apos; + ethnicity)}; 
+channelMap.put(&apos;ethnicityCSV&apos;, ethnicity);
+if (ethnicity == &apos;HISPANIC OR LATINO&apos;) {
+	ethnicity = &apos;H&apos;;
+
+} else if (ethnicity == &apos;NOT HISPANIC OR LATINO&apos;) {
+	ethnicity = &apos;N&apos;;
+
+} else {
+	ethnicity = &apos;U&apos;;
+
+};
+if (debug === true) { logger.info(channelName + &apos; - ethnicity:  &apos; + ethnicity)}; 
+channelMap.put(&apos;ethnicity&apos;, ethnicity); 
+tmp[&apos;PID&apos;][&apos;PID.22&apos;][&apos;PID.22.1&apos;] = ethnicity;
+
+
+
+/* PV1 SEGMENT*/
+// * PV1.1.1 Set ID - STATIC
+//var pv1SetId = msg[&apos;row&apos;][&apos;column40&apos;].toString();
+//if (debug === true) { logger.info(channelName + &apos; - pv1SetIdCSV:  &apos; + pv1SetId)}; 
+//channelMap.put(&apos;pv1SetIdCSV&apos;, pv1SetId); 
+//var pv1SetId = &apos;1&apos;;
+if (debug === true) { logger.info(channelName + &apos; - pv1SetId:  &apos; + pv1SetId)}; 
+channelMap.put(&apos;pv1SetId&apos;, pv1SetId); 
+tmp[&apos;PV1&apos;][&apos;PV1.1&apos;][&apos;PV1.1.1&apos;] = pv1SetId;
+
+
+// * PV1.2.1 Patient Class - JavaScript
+var patientClass = msg[&apos;row&apos;][&apos;column41&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - patientClassCSV:  &apos; + patientClass)}; 
+channelMap.put(&apos;patientClassCSV&apos;, patientClass);
+if (patientClass == &apos;OBSTETRICS&apos;) {
+	var patientClass = &apos;B&apos;;
+	
+} else if (patientClass == &apos;EMERGENCY&apos;) {
+	var patientClass = &apos;E&apos;;
+	
+} else if (patientClass == &apos;INPATIENT&apos;) {
+	var patientClass = &apos;I&apos;;
+
+} else if (patientClass == &apos;OUTPATIENT&apos;) {
+	var patientClass = &apos;O&apos;;
+
+} else if (patientClass == &apos;PREADMIT&apos;) {
+	var patientClass = &apos;P&apos;;
+
+} else if (patientClass == &apos;RECURRING PATIENT&apos;) {
+	var patientClass = &apos;R&apos;;
+
+} else {
+	var patientClass = &apos;&apos;;
+};
+if (debug === true) { logger.info(channelName + &apos; - patientClass:  &apos; + patientClass)}; 
+channelMap.put(&apos;patientClass&apos;, patientClass); 
+tmp[&apos;PV1&apos;][&apos;PV1.2&apos;][&apos;PV1.2.1&apos;] = patientClass;
+
+
+// PV1.3.1 Assigned Patient Location Point of Care
+var pointofCare = msg[&apos;row&apos;][&apos;column42&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - pointofCare:  &apos; + pointofCare)}; 
+channelMap.put(&apos;pointofCare&apos;, pointofCare); 
+tmp[&apos;PV1&apos;][&apos;PV1.2&apos;][&apos;PV1.2.1&apos;] = pointofCare;
+
+
+// PV1.3.2 Assigned Patient Location Room
+var pointofCareRoom = msg[&apos;row&apos;][&apos;column43&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - pointofCareRoom:  &apos; + pointofCareRoom)}; 
+channelMap.put(&apos;pointofCareRoom&apos;, pointofCareRoom); 
+tmp[&apos;PV1&apos;][&apos;PV1.3&apos;][&apos;PV1.3.2&apos;] = pointofCareRoom;
+
+
+// PV1.4.1 Admission Type Value
+var admissionType = msg[&apos;row&apos;][&apos;column44&apos;].toString().toUpperCase();
+if (debug === true) { logger.info(channelName + &apos; - admissionTypeCSV:  &apos; + admissionType)}; 
+channelMap.put(&apos;admissionTypeCSV&apos;, admissionType); 
+if (admissionType == &apos;ACCIDENT&apos;) {
+	admissionType = &apos;A&apos;;
+	
+} else if (admissionType == &apos;EMERGENCY&apos;) {
+	admissionType = &apos;E&apos;;
+	
+} else if (admissionType == &apos;INPATIENT&apos;) {
+	admissionType = &apos;I&apos;;
+
+} else if (admissionType == &apos;LABOR AND DELIVERY&apos;) {
+	admissionType = &apos;L&apos;;
+
+} else if (admissionType == &apos;ROUTINE&apos;) {
+	admissionType = &apos;R&apos;;
+
+} else {
+	admissionType = &apos;U&apos;;
+};
+if (debug === true) { logger.info(channelName + &apos; - admissionType:  &apos; + admissionType)}; 
+channelMap.put(&apos;admissionType&apos;, admissionType); 
+tmp[&apos;PV1&apos;][&apos;PV1.4&apos;][&apos;PV1.4.1&apos;] = admissionType;
+
+
+// PV1.6.1 Prior Patient Location Point of Care
+var priorPointofCare = msg[&apos;row&apos;][&apos;column45&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - priorPointofCare:  &apos; + priorPointofCare)}; 
+channelMap.put(&apos;priorPointofCare&apos;, priorPointofCare); 
+tmp[&apos;PV1&apos;][&apos;PV1.6&apos;][&apos;PV1.6.1&apos;] = priorPointofCare;
+
+
+// PV1.7.1 Attending Doctor ID (NPI)
+var attendingDrId = msg[&apos;row&apos;][&apos;column46&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrId:  &apos; + attendingDrId)}; 
+channelMap.put(&apos;attendingDrId&apos;, attendingDrId); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.1&apos;] = attendingDrId;
+
+
+// PV1.7.2 Attending Doctor Family Name
+var attendingDrLName = msg[&apos;row&apos;][&apos;column47&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrLName:  &apos; + attendingDrLName)}; 
+channelMap.put(&apos;attendingDrLName&apos;, attendingDrLName); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.2&apos;] = attendingDrLName;
+
+
+// PV1.7.3 Attending Doctor Given Name
+var attendingDrFName = msg[&apos;row&apos;][&apos;column48&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrFName:  &apos; + attendingDrFName)}; 
+channelMap.put(&apos;attendingDrFName&apos;, attendingDrFName); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.3&apos;] = attendingDrFName;
+
+
+// PV1.7.4 Attending Doctor Middle Name
+var attendingDrMName = msg[&apos;row&apos;][&apos;column49&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrMName:  &apos; + attendingDrMName)}; 
+channelMap.put(&apos;attendingDrMName&apos;, attendingDrMName); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.4&apos;] = attendingDrMName;
+
+
+// PV1.7.5 Attending Doctor Suffix
+var attendingDrSuffix = msg[&apos;row&apos;][&apos;column50&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrSuffix:  &apos; + attendingDrSuffix)}; 
+channelMap.put(&apos;attendingDrSuffix&apos;, attendingDrSuffix); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.5&apos;] = attendingDrSuffix;
+
+
+// PV1.7.6 Attending Doctor Prefix
+var attendingDrPrefix = msg[&apos;row&apos;][&apos;column51&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrPrefix:  &apos; + attendingDrPrefix)}; 
+channelMap.put(&apos;attendingDrPrefix&apos;, attendingDrPrefix); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.6&apos;] = attendingDrPrefix;
+
+
+// PV1.7.7 Attending Doctor Degree
+var attendingDrDegree = msg[&apos;row&apos;][&apos;column52&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrDegree:  &apos; + attendingDrDegree)}; 
+channelMap.put(&apos;attendingDrDegree&apos;, attendingDrDegree); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.7&apos;] = attendingDrDegree;
+
+
+// PV1.7.13 Attending Doctor Identifier Type Code
+var attendingDrIdCode = msg[&apos;row&apos;][&apos;column53&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrIdCode:  &apos; + attendingDrIdCode)}; 
+channelMap.put(&apos;attendingDrIdCode&apos;, attendingDrIdCode); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.13&apos;] = attendingDrIdCode;
+
+
+// PV1.7.30 Attending Doctor Email Address
+var attendingDrEmail = msg[&apos;row&apos;][&apos;column54&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - attendingDrEmail:  &apos; + attendingDrEmail)}; 
+channelMap.put(&apos;attendingDrEmail&apos;, attendingDrEmail); 
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.30&apos;] = attendingDrEmail;
+
+
+// PV1.8.1 Referring Doctor ID
+var referringDrId = msg[&apos;row&apos;][&apos;column55&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrId:  &apos; + referringDrId)}; 
+channelMap.put(&apos;referringDrId&apos;, referringDrId); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.1&apos;] = referringDrId;
+
+
+// PV1.8.2 Referring Doctor Family Name
+var referringDrLName = msg[&apos;row&apos;][&apos;column56&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrLName:  &apos; + referringDrLName)}; 
+channelMap.put(&apos;referringDrLName&apos;, referringDrLName); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.2&apos;] = referringDrLName;
+
+
+// PV1.8.3 Referring Doctor Given Name
+var referringDrFName = msg[&apos;row&apos;][&apos;column57&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrFName:  &apos; + referringDrFName)}; 
+channelMap.put(&apos;referringDrFName&apos;, referringDrFName); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.3&apos;] = referringDrFName;
+
+
+// PV1.8.4 Referring Doctor Middle Name
+var referringDrMName = msg[&apos;row&apos;][&apos;column58&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrMName:  &apos; + referringDrMName)}; 
+channelMap.put(&apos;referringDrMName&apos;, referringDrMName); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.4&apos;] = referringDrMName
+
+
+// PV1.8.5 Referring Doctor Suffix
+var referringDrSuffix = msg[&apos;row&apos;][&apos;column59&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrSuffix:  &apos; + referringDrSuffix)}; 
+channelMap.put(&apos;referringDrSuffix&apos;, referringDrSuffix); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.5&apos;] = referringDrSuffix;
+
+// PV1.8.6 Referring Doctor Prefix
+var referringDrPrefix = msg[&apos;row&apos;][&apos;column60&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrPrefix:  &apos; + referringDrPrefix)}; 
+channelMap.put(&apos;referringDrPrefix&apos;, referringDrPrefix); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.6&apos;] = referringDrPrefix;
+
+
+// PV1.8.7 Referring Doctor Degree
+var referringDrDegree = msg[&apos;row&apos;][&apos;column61&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrDegree:  &apos; + referringDrDegree)}; 
+channelMap.put(&apos;referringDrDegree&apos;, referringDrDegree); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.7&apos;] = referringDrDegree;
+
+// PV1.8.13 Referring Doctor Identifier Type Code
+var referringDrIdCode = msg[&apos;row&apos;][&apos;column62&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrIdCode:  &apos; + referringDrIdCode)}; 
+channelMap.put(&apos;referringDrIdCode&apos;, referringDrIdCode); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.13&apos;] = referringDrIdCode;
+
+
+// PV1.8.30 Referring Doctor Email Address
+var referringDrEmail = msg[&apos;row&apos;][&apos;column633&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - referringDrEmail:  &apos; + referringDrEmail)}; 
+channelMap.put(&apos;referringDrEmail&apos;, referringDrEmail); 
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.30&apos;] = referringDrEmail;
+
+
+// PV1.9.1 Consulting Doctor ID
+var consultingDrId = msg[&apos;row&apos;][&apos;column64&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrId:  &apos; + consultingDrId)}; 
+channelMap.put(&apos;consultingDrId&apos;, consultingDrId); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.1&apos;] = consultingDrId;
+
+
+// PV1.9.2 Consulting Doctor Family Name
+var consultingDrLName = msg[&apos;row&apos;][&apos;column65&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrLName:  &apos; + consultingDrLName)}; 
+channelMap.put(&apos;consultingDrLName&apos;, consultingDrLName); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.2&apos;] = consultingDrLName;
+
+
+// PV1.9.3 Consulting Doctor Given Name
+var consultingDrFName = msg[&apos;row&apos;][&apos;column66&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrFName:  &apos; + consultingDrFName)}; 
+channelMap.put(&apos;consultingDrFName&apos;, consultingDrFName); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.3&apos;] = consultingDrFName;
+
+
+// PV1.9.4 Consulting Doctor Middle Name
+var consultingDrMName = msg[&apos;row&apos;][&apos;column67&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrMName:  &apos; + consultingDrMName)}; 
+channelMap.put(&apos;consultingDrMName&apos;, consultingDrMName); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.4&apos;] = consultingDrMName;
+
+// PV1.9.5 Consulting Doctor Suffix
+var consultingDrSuffix = msg[&apos;row&apos;][&apos;column68&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrSuffix:  &apos; + consultingDrSuffix)}; 
+channelMap.put(&apos;consultingDrSuffix&apos;, consultingDrSuffix); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.5&apos;] = consultingDrSuffix;
+
+
+// PV1.9.6 Consulting Doctor Prefix
+var consultingDrPrefix = msg[&apos;row&apos;][&apos;column69&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrPrefix:  &apos; + consultingDrPrefix)}; 
+channelMap.put(&apos;consultingDrPrefix&apos;, consultingDrPrefix); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.6&apos;] = consultingDrPrefix;
+
+
+// PV1.9.7 Consulting Doctor Degree
+var consultingDrDegree = msg[&apos;row&apos;][&apos;column70&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrDegree:  &apos; + consultingDrDegree)}; 
+channelMap.put(&apos;consultingDrDegree&apos;, consultingDrDegree); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.7&apos;] = consultingDrDegree;
+
+
+// PV1.9.13 Consulting Doctor Identifier Type Code
+var consultingDrIdCode = msg[&apos;row&apos;][&apos;column71&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrIdCode:  &apos; + consultingDrIdCode)}; 
+channelMap.put(&apos;consultingDrIdCode&apos;, consultingDrIdCode); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.13&apos;] = consultingDrIdCode;
+
+
+// PV1.9.30 Consulting Doctor Email Address
+var consultingDrEmail = msg[&apos;row&apos;][&apos;column72&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - consultingDrEmail:  &apos; + consultingDrEmail)}; 
+channelMap.put(&apos;consultingDrEmail&apos;, consultingDrEmail); 
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;][&apos;PV1.9.30&apos;] = consultingDrEmail;
+
+
+// PV1.10.1 Hospital Service
+var hospitalServer = msg[&apos;row&apos;][&apos;column73&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - hospitalServer:  &apos; + hospitalServer)}; 
+channelMap.put(&apos;hospitalServer&apos;, hospitalServer); 
+tmp[&apos;PV1&apos;][&apos;PV1.10&apos;][&apos;PV1.10.1&apos;] = hospitalServer;
+
+
+// PV1.12.1 Preadmit Test Indicator
+var preadmitTestIndicator = msg[&apos;row&apos;][&apos;column74&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - preadmitTestIndicator:  &apos; + preadmitTestIndicator)}; 
+channelMap.put(&apos;preadmitTestIndicator&apos;, preadmitTestIndicator); 
+tmp[&apos;PV1&apos;][&apos;PV1.12&apos;][&apos;PV1.12.1&apos;] = preadmitTestIndicator;
+
+
+// PV1.14.1 Admit Source
+var admitSource = msg[&apos;row&apos;][&apos;column75&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admitSource:  &apos; + admitSource)}; 
+channelMap.put(&apos;admitSource&apos;, admitSource); 
+tmp[&apos;PV1&apos;][&apos;PV1.14&apos;][&apos;PV1.14.1&apos;] = admitSource;
+
+
+// PV1.17.1 Admitting Doctor ID
+var admittingDrId = msg[&apos;row&apos;][&apos;column76&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrId:  &apos; + admittingDrId)}; 
+channelMap.put(&apos;admittingDrId&apos;, admittingDrId); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.1&apos;] = admittingDrId;
+
+
+// PV1.17.2 Admitting Doctor Family Name
+var admittingDrLName = msg[&apos;row&apos;][&apos;column77&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrLName:  &apos; + admittingDrLName)}; 
+channelMap.put(&apos;admittingDrLName&apos;, admittingDrLName); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.2&apos;] = admittingDrLName;
+
+
+// PV1.17.3 Admitting Doctor Given Name
+var admittingDrFName = msg[&apos;row&apos;][&apos;column78&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrFName:  &apos; + admittingDrFName)}; 
+channelMap.put(&apos;admittingDrFName&apos;, admittingDrFName); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.3&apos;] = admittingDrFName;
+
+
+// PV1.17.4 Admitting Doctor Middle Name
+var admittingDrMName = msg[&apos;row&apos;][&apos;column79&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrMName:  &apos; + admittingDrMName)}; 
+channelMap.put(&apos;admittingDrMName&apos;, admittingDrMName); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.4&apos;] = admittingDrMName;
+
+
+// PV1.17.5 Admitting Doctor Suffix
+var admittingDrSuffix = msg[&apos;row&apos;][&apos;column80&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrSuffix:  &apos; + admittingDrSuffix)}; 
+channelMap.put(&apos;admittingDrSuffix&apos;, admittingDrSuffix); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.5&apos;] = admittingDrSuffix;
+
+
+// PV1.17.6 Admitting Doctor Prefix
+var admittingDrPrefix = msg[&apos;row&apos;][&apos;column81&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrPrefix:  &apos; + admittingDrPrefix)}; 
+channelMap.put(&apos;admittingDrPrefix&apos;, admittingDrPrefix); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.6&apos;] = admittingDrPrefix;
+
+
+// PV1.17.7 Admitting Doctor Degree
+var admittingDrDegree = msg[&apos;row&apos;][&apos;column82&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrDegree:  &apos; + admittingDrDegree)}; 
+channelMap.put(&apos;admittingDrDegree&apos;, admittingDrDegree); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.7&apos;] = admittingDrDegree;
+
+
+// PV1.17.13 Admitting Doctor Identifier Type Code
+var admittingDrIdCode = msg[&apos;row&apos;][&apos;column83&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrIdCode:  &apos; + admittingDrIdCode)}; 
+channelMap.put(&apos;admittingDrIdCode&apos;, admittingDrIdCode); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.13&apos;] = admittingDrIdCode;
+
+
+// PV1.17.30 Admitting Doctor Email Address
+var admittingDrEmail = msg[&apos;row&apos;][&apos;column84&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admittingDrEmail:  &apos; + admittingDrEmail)}; 
+channelMap.put(&apos;admittingDrEmail&apos;, admittingDrEmail); 
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;][&apos;PV1.17.30&apos;] = admittingDrEmail;
+
+
+// PV1.18.1 Patient Type
+var patientType = msg[&apos;row&apos;][&apos;column85&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - patientType:  &apos; + patientType)}; 
+channelMap.put(&apos;patientType&apos;, patientType); 
+tmp[&apos;PV1&apos;][&apos;PV1.18&apos;][&apos;PV1.18.1&apos;] = patientType;
+
+
+// PV1.20.1 Financial Class
+var financialClass = msg[&apos;row&apos;][&apos;column86&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - financialClass:  &apos; + financialClass)}; 
+channelMap.put(&apos;financialClass&apos;, financialClass); 
+tmp[&apos;PV1&apos;][&apos;PV1.20&apos;][&apos;PV1.20.1&apos;] = financialClass;
+
+
+// PV1.24.1 Contract Code
+var ContractCode = msg[&apos;row&apos;][&apos;column87&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - ContractCode:  &apos; + ContractCode)}; 
+channelMap.put(&apos;ContractCode&apos;, ContractCode); 
+tmp[&apos;PV1&apos;][&apos;PV1.24&apos;][&apos;PV1.24.1&apos;] = ContractCode;
+
+
+// * PV1.25.1 Contract Effective Date - Add dateUtil
+var ContractEffDate = msg[&apos;row&apos;][&apos;column88&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - ContractEffDateCSV:  &apos; + ContractEffDate)}; 
+channelMap.put(&apos;ContractEffDateCSV&apos;, ContractEffDate); 
+var ContractEffDate = DateUtil.convertDate(&apos;MMddyyyy&apos;, &apos;yyyyMMdd&apos;, ContractEffDate);
+if (debug === true) { logger.info(channelName + &apos; - ContractEffDate:  &apos; + ContractEffDate)}; 
+channelMap.put(&apos;ContractEffDate&apos;, ContractEffDate); 
+tmp[&apos;PV1&apos;][&apos;PV1.25&apos;][&apos;PV1.25.1&apos;] = ContractEffDate;
+
+
+// PV1.36.1 Discharge Disposition
+var dischargeDisposition = msg[&apos;row&apos;][&apos;column89&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - dischargeDisposition:  &apos; + dischargeDisposition)}; 
+channelMap.put(&apos;dischargeDisposition&apos;, dischargeDisposition); 
+tmp[&apos;PV1&apos;][&apos;PV1.36&apos;][&apos;PV1.36.1&apos;] = dischargeDisposition;
+
+
+// PV1.37.1 Discharged to Location
+var dischargeLocation = msg[&apos;row&apos;][&apos;column90&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - dischargeLocation:  &apos; + dischargeLocation)}; 
+channelMap.put(&apos;dischargeLocation&apos;, dischargeLocation); 
+tmp[&apos;PV1&apos;][&apos;PV1.37&apos;][&apos;PV1.37.1&apos;] = dischargeLocation;
+
+
+// PV1.41.1 Account Status
+var accountStatus = msg[&apos;row&apos;][&apos;column91&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - accountStatus:  &apos; + accountStatus)}; 
+channelMap.put(&apos;accountStatus&apos;, accountStatus); 
+tmp[&apos;PV1&apos;][&apos;PV1.41&apos;][&apos;PV1.41.1&apos;] = accountStatus;
+
+
+// * PV1.44.1 Admit Date/Time - Add dateUtil
+var admitDateTime = msg[&apos;row&apos;][&apos;column92&apos;].toString();
+if (debug === true) { logger.info(channelName + &apos; - admitDateTimeCSV:  &apos; + admitDateTime)}; 
+channelMap.put(&apos;admitDateTimeCSV&apos;, admitDateTime); 
+var admitDateTime = DateUtil.convertDate(&apos;MMddyyyy HH:mm:ss&apos;, &apos;yyyyMMddHHmmss&apos;, admitDateTime);
+if (debug === true) { logger.info(channelName + &apos; - admitDateTime:  &apos; + admitDateTime)}; 
+channelMap.put(&apos;admitDateTime&apos;, admitDateTime); 
+tmp[&apos;PV1&apos;][&apos;PV1.44&apos;][&apos;PV1.44.1&apos;] = admitDateTime;
+
+
+
+// End</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+      </elements>
+      <inboundTemplate encoding="base64">RVZFTlQsRmllbGQgU2VwYXJhdG9yLEVuY29kaW5nIENoYXJhY3RlcnMsU2VuZGluZyBBcHBsaWNhdGlvbixTZW5kaW5nIEZhY2lsaXR5LFJlY2VpdmluZyBBcHBsaWNhdGlvbixSZWNlaXZpbmcgRmFjaWxpdHksRGF0ZS9UaW1lIG9mIE1lc3NhZ2UsTWVzc2FnZSBUeXBlLFRyaWdnZXIgRXZlbnQsTWVzc2FnZSBDb250cm9sIElELFByb2Nlc3NpbmcgSUQsVmVyc2lvbiBJRCxQRCBTZXQgSUQsSUQgSW50ZXJuYWwsRmFtaWx5IE5hbWUsR2l2ZW4gTmFtZSxNaWRkbGUgTmFtZSxTdWZmaXgsUHJlZml4LERhdGVUaW1lIG9mIEJpcnRoLEFkbWluaXN0cmF0aXZlIFNleCxSYWNlLFN0cmVldCBBZGRyZXNzLE90aGVyIERlc2lnbmF0aW9uLENpdHksU3RhdGUsUG9zdGFsIENvZGUsQ291bnR5IENvZGUsUGhvbmUgTnVtYmVyIEhvbWUsUGhvbmUgTnVtYmVyIEhvbWUgRW1haWwgQWRkcmVzcyxQaG9uZSBOdW1iZXIgQnVzaW5lc3MsUHJpbWFyeSBMYW5ndWFnZSxNYXJpdGFsIFN0YXR1cyxSZWxpZ2lvbixBY2NvdW50IE51bWJlciBJRCxTU04gTnVtYmVyLERyaXZlcnMgTGljZW5zZSBOdW1iZXIsRXRobmljIEdyb3VwLFBWIFNldCBJRCxQYXRpZW50IENsYXNzLEFzc2lnbmVkIFBhdGllbnQgTG9jYXRpb24gUG9pbnQgb2YgQ2FyZSxBc3NpZ25lZCBQYXRpZW50IExvY2F0aW9uIFJvb20sQWRtaXNzaW9uIFR5cGUgVmFsdWUsUHJpb3IgUGF0aWVudCBMb2NhdGlvbiBQb2ludCBvZiBDYXJlLEF0dGVuZGluZyBEb2N0b3IgSUQsQXR0ZW5kaW5nIERvY3RvciBGYW1pbHkgTmFtZSxBdHRlbmRpbmcgRG9jdG9yIEdpdmVuIE5hbWUsQXR0ZW5kaW5nIERvY3RvciBNaWRkbGUgTmFtZSxBdHRlbmRpbmcgRG9jdG9yIFN1ZmZpeCxBdHRlbmRpbmcgRG9jdG9yIFByZWZpeCxBdHRlbmRpbmcgRG9jdG9yIERlZ3JlZSxBdHRlbmRpbmcgRG9jdG9yIElkZW50aWZpZXIgVHlwZSBDb2RlLEF0dGVuZGluZyBEb2N0b3IgRW1haWwgQWRkcmVzcyxSZWZlcnJpbmcgRG9jdG9yIElELFJlZmVycmluZyBEb2N0b3IgRmFtaWx5IE5hbWUsUmVmZXJyaW5nIERvY3RvciBHaXZlbiBOYW1lLFJlZmVycmluZyBEb2N0b3IgTWlkZGxlIE5hbWUsUmVmZXJyaW5nIERvY3RvciBTdWZmaXgsUmVmZXJyaW5nIERvY3RvciBQcmVmaXgsUmVmZXJyaW5nIERvY3RvciBEZWdyZWUsUmVmZXJyaW5nIERvY3RvciBJZGVudGlmaWVyIFR5cGUgQ29kZSxSZWZlcnJpbmcgRG9jdG9yIEVtYWlsIEFkZHJlc3MsQ29uc3VsdGluZyBEb2N0b3IgSUQsQ29uc3VsdGluZyBEb2N0b3IgRmFtaWx5IE5hbWUsQ29uc3VsdGluZyBEb2N0b3IgR2l2ZW4gTmFtZSxDb25zdWx0aW5nIERvY3RvciBNaWRkbGUgTmFtZSxDb25zdWx0aW5nIERvY3RvciBTdWZmaXgsQ29uc3VsdGluZyBEb2N0b3IgUHJlZml4LENvbnN1bHRpbmcgRG9jdG9yIERlZ3JlZSxDb25zdWx0aW5nIERvY3RvciBJZGVudGlmaWVyIFR5cGUgQ29kZSxDb25zdWx0aW5nIERvY3RvciBFbWFpbCBBZGRyZXNzLEhvc3BpdGFsIFNlcnZpY2UsUHJlYWRtaXQgVGVzdCBJbmRpY2F0b3IsQWRtaXQgU291cmNlLEFkbWl0dGluZyBEb2N0b3IgSUQsQWRtaXR0aW5nIERvY3RvciBGYW1pbHkgTmFtZSxBZG1pdHRpbmcgRG9jdG9yIEdpdmVuIE5hbWUsQWRtaXR0aW5nIERvY3RvciBNaWRkbGUgTmFtZSxBZG1pdHRpbmcgRG9jdG9yIFN1ZmZpeCxBZG1pdHRpbmcgRG9jdG9yIFByZWZpeCxBZG1pdHRpbmcgRG9jdG9yIERlZ3JlZSxBZG1pdHRpbmcgRG9jdG9yIElkZW50aWZpZXIgVHlwZSBDb2RlLEFkbWl0dGluZyBEb2N0b3IgRW1haWwgQWRkcmVzcyxQYXRpZW50IFR5cGUsRmluYW5jaWFsIENsYXNzLENvbnRyYWN0IENvZGUsQ29udHJhY3QgRWZmZWN0aXZlIERhdGUsRGlzY2hhcmdlIERpc3Bvc2l0aW9uLERpc2NoYXJnZWQgdG8gTG9jYXRpb24sQWNjb3VudCBTdGF0dXMsQWRtaXQgRGF0ZS9UaW1l</inboundTemplate>
+      <outboundTemplate encoding="base64">TVNIfF5+XCZ8fHx8fHx8QURUXnx8fA1QSUR8MXx8MjU3MF5eXjExMDA4MHx8RmlzaF5LeWxlXl5efHwxOTM5MTAwMXxNfHxXfDU2OSBDYXJkaW5hbCBBdmVeXk5ldyBCcmF1bmZlbHNeVFheNzgxMzAtMDAwMHwwOTEwfCg4MzApNzA4LTYyOTdeXl5hbm5lLndvbGY3MEBnbWFpbC5jb218fEVuZ2xpc2h8TXx8MTEwMDgwMTA0NDQ4Xl5eMTEwMDgwfDIwNDM3NzgyMXx8fE5vdCBIaXNwYW5pYyBvciBMYXRpbm98fHwNUFYxfDF8SVJGfDAxXlNUQTEwMTA2MDFeXnwzfHwwMDIzM3wwMDI4MF5Db252ZXJzaW9uXlBoeXNpY2lhbl5eXl4xMTU0NjQ2NTYwfHx8SVJGfHxOfHw0fHx8MDAyODBeQ29udmVyc2lvbl5QaHlzaWNpYW5eXl5eMTE1NDY0NjU2MHxJUkZ8fENOfHx8fENOfDIwMjQwOTIzfHx8fHx8fHx8fHx8MDAwMDB8fHx8MXx8fDIwMjQwOTIzMTYxOHx8fHx8fHx8MF5eXl5eXjExNTQ2NDY1NjA=</outboundTemplate>
+      <inboundDataType>DELIMITED</inboundDataType>
+      <outboundDataType>HL7V2</outboundDataType>
+      <inboundProperties class="com.mirth.connect.plugins.datatypes.delimited.DelimitedDataTypeProperties" version="4.2.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.delimited.DelimitedSerializationProperties" version="4.2.0">
+          <columnDelimiter>,</columnDelimiter>
+          <recordDelimiter>\n</recordDelimiter>
+          <quoteToken>&quot;</quoteToken>
+          <escapeWithDoubleQuote>true</escapeWithDoubleQuote>
+          <quoteEscapeToken>\</quoteEscapeToken>
+          <numberedRows>false</numberedRows>
+          <ignoreCR>true</ignoreCR>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.delimited.DelimitedDeserializationProperties" version="4.2.0">
+          <columnDelimiter>,</columnDelimiter>
+          <recordDelimiter>\n</recordDelimiter>
+          <quoteToken>&quot;</quoteToken>
+          <escapeWithDoubleQuote>true</escapeWithDoubleQuote>
+          <quoteEscapeToken>\</quoteEscapeToken>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.delimited.DelimitedBatchProperties" version="4.2.0">
+          <splitType>Record</splitType>
+          <batchSkipRecords>1</batchSkipRecords>
+          <batchMessageDelimiter></batchMessageDelimiter>
+          <batchMessageDelimiterIncluded>false</batchMessageDelimiterIncluded>
+          <batchGroupingColumn></batchGroupingColumn>
+          <batchScript></batchScript>
+        </batchProperties>
+      </inboundProperties>
+      <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="4.2.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="4.2.0">
+          <handleRepetitions>true</handleRepetitions>
+          <handleSubcomponents>true</handleSubcomponents>
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <stripNamespaces>false</stripNamespaces>
+          <segmentDelimiter>\r</segmentDelimiter>
+          <convertLineBreaks>true</convertLineBreaks>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="4.2.0">
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <segmentDelimiter>\r</segmentDelimiter>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="4.2.0">
+          <splitType>MSH_Segment</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+        <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="4.2.0">
+          <segmentDelimiter>\r</segmentDelimiter>
+          <successfulACKCode>AA</successfulACKCode>
+          <successfulACKMessage></successfulACKMessage>
+          <errorACKCode>AE</errorACKCode>
+          <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+          <rejectedACKCode>AR</rejectedACKCode>
+          <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+          <msh15ACKAccept>false</msh15ACKAccept>
+          <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+        </responseGenerationProperties>
+        <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="4.2.0">
+          <successfulACKCode>AA,CA</successfulACKCode>
+          <errorACKCode>AE,CE</errorACKCode>
+          <rejectedACKCode>AR,CR</rejectedACKCode>
+          <validateMessageControlId>true</validateMessageControlId>
+          <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+          <originalIdMapVariable></originalIdMapVariable>
+        </responseValidationProperties>
+      </outboundProperties>
+    </transformer>
+    <filter version="4.2.0">
+      <elements>
+        <com.mirth.connect.plugins.rulebuilder.RuleBuilderRule version="4.2.0">
+          <name>Accept message if &quot;msg[&apos;row&apos;][&apos;column1&apos;].toString()&quot; does not equal &apos;admit&apos;</name>
+          <sequenceNumber>0</sequenceNumber>
+          <enabled>false</enabled>
+          <field>msg[&apos;row&apos;][&apos;column1&apos;].toString()</field>
+          <condition>NOT_EQUAL</condition>
+          <values>
+            <string>&apos;admit&apos;</string>
+          </values>
+        </com.mirth.connect.plugins.rulebuilder.RuleBuilderRule>
+      </elements>
+    </filter>
+    <transportName>Channel Reader</transportName>
+    <mode>SOURCE</mode>
+    <enabled>true</enabled>
+    <waitForPrevious>true</waitForPrevious>
+  </sourceConnector>
+  <destinationConnectors>
+    <connector version="4.2.0">
+      <metaDataId>1</metaDataId>
+      <name>Channel Writer - Send to: Component2 - HL7 Consumer</name>
+      <properties class="com.mirth.connect.connectors.vm.VmDispatcherProperties" version="4.2.0">
+        <pluginProperties/>
+        <destinationConnectorProperties version="4.2.0">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+          <reattachAttachments>true</reattachAttachments>
+        </destinationConnectorProperties>
+        <channelId>1817ae1a-d027-49bb-8014-f16bc5c16ab9</channelId>
+        <channelTemplate>${message.encodedData}</channelTemplate>
+        <mapVariables>
+          <string>channelName</string>
+        </mapVariables>
+      </properties>
+      <transformer version="4.2.0">
+        <elements>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="4.2.0">
+            <name>STATIC and Javascript Variables</name>
+            <sequenceNumber>0</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// Begin
+
+
+
+// Logger Debug Switch
+var debug = true;
+
+// 
+var channel = channelName;
+if (debug == true) { logger.info(channel + &apos; - channelName:  &apos; + channel)};
+channelMap.put(&apos;channelName&apos;, channel);
+
+
+
+// End</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="4.2.0">
+            <name>Loop Through 3 Element Array Exercise</name>
+            <sequenceNumber>1</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// Begin Loop Through 3 Element Array exercise
+
+
+
+// Create fruits array
+var fruits = [&quot;Banana&quot;, &quot;Orange&quot;, &quot;Apple&quot;];
+if (debug == true) { logger.info(channel + &apos; - fruits&apos; + &apos; :  &apos; + fruits)};
+
+
+// Get count of fruits in fruits array
+var fruitsLength = fruits.length;
+if (debug == true) { logger.info(channel + &apos; - fruitsLength&apos; + &apos; :  &apos; + fruitsLength)};
+
+
+// Create Logger statemnt and ChannlMap for the count of fruits in the fruits array
+for (var i = 0; i &lt; fruitsLength; i++) {
+
+	// Increment array number value by 1.  Use to define the fruit logger and channel statements starting at 1
+	var j = i + 1;
+
+	// Create Logger statemnt and ChannlMap for the count of fruits in the fruits array
+	if (debug == true) { logger.info(channel + &apos; - fruit&apos; + j + &apos; :  &apos; + fruits[i])};
+	channelMap.put(&apos;fruit&apos; + j,                 fruits[i]);
+	
+};
+
+
+
+// End</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        </elements>
+        <inboundTemplate encoding="base64">TVNIfF5+XCZ8SENTIElOVEVSQUNUQU5UfE5ldyBCcmF1bmZlbHMgUmVnaW9uYWwgUmVoYWJ8TWlydGggU2VuZCAtIEVybmVzdHxWSUJNSVJUSHwyMDI0MDkyMzE0MjAzMHx8QURUXkEwMXwxMTAwODAyMDI0MDkyMzg3NjAyNXxQfDIuMw1FVk58QTAxfDIwMjQwOTIzMTQyMHx8fHwyMDI0MDkyMw1QSUR8MXx8MjU3MF5eXjExMDA4MHx8RmlzaF5LeWxlXl5efHwxOTM5MTAwMXxNfHxXfDU2OSBDYXJkaW5hbCBBdmVeXk5ldyBCcmF1bmZlbHNeVFheNzgxMzAtMDAwMHwwOTEwfCg4MzApNzA4LTYyOTdeXl5hbm5lLndvbGY3MEBnbWFpbC5jb218fEVuZ2xpc2h8TXx8MTEwMDgwMTA0NDQ4Xl5eMTEwMDgwfDIwNDM3NzgyMXx8fE5vdCBIaXNwYW5pYyBvciBMYXRpbm98fHwNUEQxfDF8fHx8fHx8fHx8fDIwMjQwMTAxXl5OfA1QVjF8MXxJUkZ8MDFeU1RBMTAxMDYwMV5efDN8fDAwMjMzfDAwMjgwXkNvbnZlcnNpb25eUGh5c2ljaWFuXl5eXjExNTQ2NDY1NjB8fHxJUkZ8fE58fDR8fHwwMDI4MF5Db252ZXJzaW9uXlBoeXNpY2lhbl5eXl4xMTU0NjQ2NTYwfElSRnx8Q058fHx8Q058MjAyNDA5MjN8fHx8fHx8fHx8fHwwMDAwMHx8fHwxfHx8MjAyNDA5MjMxNjE4fHx8fHx8fHwwXl5eXl5eMTE1NDY0NjU2MA==</inboundTemplate>
+        <outboundTemplate encoding="base64"></outboundTemplate>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>HL7V2</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="4.2.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="4.2.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>false</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="4.2.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="4.2.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="4.2.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="4.2.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="4.2.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="4.2.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>false</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="4.2.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="4.2.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="4.2.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="4.2.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="4.2.0">
+        <elements/>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>HL7V2</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="4.2.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="4.2.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>false</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="4.2.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="4.2.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="4.2.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="4.2.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="4.2.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="4.2.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>false</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="4.2.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="4.2.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="4.2.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="4.2.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="4.2.0">
+        <elements/>
+      </filter>
+      <transportName>Channel Writer</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+  </destinationConnectors>
+  <preprocessingScript>// Modify the message variable below to pre process data
+return message;</preprocessingScript>
+  <postprocessingScript>// This script executes once after a message has been processed
+// Responses returned from here will be stored as &quot;Postprocessor&quot; in the response map
+return;</postprocessingScript>
+  <deployScript>// This script executes once when the channel is deployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</deployScript>
+  <undeployScript>// This script executes once when the channel is undeployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</undeployScript>
+  <properties version="4.2.0">
+    <clearGlobalChannelMap>true</clearGlobalChannelMap>
+    <messageStorageMode>DEVELOPMENT</messageStorageMode>
+    <encryptData>false</encryptData>
+    <removeContentOnCompletion>false</removeContentOnCompletion>
+    <removeOnlyFilteredOnCompletion>false</removeOnlyFilteredOnCompletion>
+    <removeAttachmentsOnCompletion>false</removeAttachmentsOnCompletion>
+    <initialState>STARTED</initialState>
+    <storeAttachments>true</storeAttachments>
+    <metaDataColumns>
+      <metaDataColumn>
+        <name>SOURCE</name>
+        <type>STRING</type>
+        <mappingName>mirth_source</mappingName>
+      </metaDataColumn>
+      <metaDataColumn>
+        <name>TYPE</name>
+        <type>STRING</type>
+        <mappingName>mirth_type</mappingName>
+      </metaDataColumn>
+    </metaDataColumns>
+    <attachmentProperties version="4.2.0">
+      <type>None</type>
+      <properties/>
+    </attachmentProperties>
+    <resourceIds class="linked-hash-map">
+      <entry>
+        <string>Default Resource</string>
+        <string>[Default Resource]</string>
+      </entry>
+    </resourceIds>
+  </properties>
+  <exportData>
+    <metadata>
+      <enabled>true</enabled>
+      <lastModified>
+        <time>1727787886523</time>
+        <timezone>America/New_York</timezone>
+      </lastModified>
+      <pruningSettings>
+        <archiveEnabled>true</archiveEnabled>
+        <pruneErroredMessages>false</pruneErroredMessages>
+      </pruningSettings>
+      <userId>15</userId>
+    </metadata>
+    <channelTags>
+      <channelTag>
+        <id>87d3e787-a381-44ef-824f-1a343993783e</id>
+        <name>Ray</name>
+        <channelIds>
+          <string>1817ae1a-d027-49bb-8014-f16bc5c16ab9</string>
+          <string>95234f88-3643-47a0-8684-e24c6c27cc4e</string>
+          <string>1dfe475e-a43b-429c-b8c5-61f1adb8a5f8</string>
+          <string>a1132f2e-5998-4c50-820a-14d7808af21f</string>
+          <string>a996e435-a669-4e5d-a871-bed515b477b3</string>
+        </channelIds>
+        <backgroundColor>
+          <red>51</red>
+          <green>0</green>
+          <blue>153</blue>
+          <alpha>255</alpha>
+        </backgroundColor>
+      </channelTag>
+    </channelTags>
+  </exportData>
+</channel>
